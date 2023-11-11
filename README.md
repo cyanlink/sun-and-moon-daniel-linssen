@@ -1,7 +1,11 @@
 # sun-and-moon-daniel-linssen
 This is a practice project, fan made Unity port of "sun and moon" by daniel linssen (@managore).
 
-When I lost my creativity I often try to look for some minigame on itch.io. 
+Includes new levels designed by me.
+
+I am yet to ask for a permission, but I will not be using the same assets so I guess it will be fine.
+
+When I lost my creativity I often try to look for some minigame on itch.io.
 You know when some troll arrogant idea-popper comes up with tons of lame, unfeasible, unplayable ideas about making a platformer, things gets
 really boring, the team gets unmotivated and whoosh, nothing is achieved in the end.
 
