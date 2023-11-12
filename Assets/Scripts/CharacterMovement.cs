@@ -70,7 +70,7 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
             {
                 if (movement.y > 0)
                 {
-                    rb.AddForce(jumpForce * Vector2.up, ForceMode2D.Impulse);
+                    rb.AddForce(jumpForce * movement.y * Vector2.up, ForceMode2D.Impulse);
                 }
             }
         }
