@@ -37,6 +37,7 @@ public class SwitchWorldManager : MonoSingleton<SwitchWorldManager>
 
     public void SwitchWorld()
     {
+        Debug.Log("World Switching!");
         coll.isTrigger = true;
     }
 }

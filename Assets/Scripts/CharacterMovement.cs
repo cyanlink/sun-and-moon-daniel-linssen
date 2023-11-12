@@ -1,20 +1,25 @@
 using System;
-using System.Collections;
-using System.Collections.Generic;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class CharacterMovement : MonoBehaviour
 {
-    [SerializeField] public LayerMask groundLayerMask;
+    public LayerMask groundLayerMask;
+    public float JumpForce = 3;
     
     Rigidbody2D rb;
+    private Vector2 movement;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+    }
+
+    private void FixedUpdate()
+    {
+        rb.velocity = new(movement.x, rb.velocity.y);
+
     }
 
     /// <summary>
@@ -31,14 +36,19 @@ public class CharacterMovement : MonoBehaviour
 
     public void OnMove(InputAction.CallbackContext ctx)
     {
-        var value = ctx.ReadValue<Vector2>();
-        //Horizontal Movement is always Allowed
-        rb.velocity = new (value.x, rb.velocity.y);
-        if (IsGrounded())
+        //Debug.Log("Moving");
+        movement = ctx.ReadValue<Vector2>();
+
+        if (ctx.performed)
         {
-            if (value.y > 0)
+            //Horizontal Movement is always Allowed
+            
+            if (IsGrounded())
             {
-                rb.AddForce(Vector2.up, ForceMode2D.Impulse);
+                if (movement.y > 0)
+                {
+                    rb.AddForce(JumpForce * Vector2.up, ForceMode2D.Impulse);
+                }
             }
         }
     }
@@ -49,7 +59,7 @@ public class CharacterMovement : MonoBehaviour
     /// <param name="ctx"></param>
     public void OnSwitchWorld(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed)
+        if (ctx.started)
         {
             //anyway we just dont schedule a turn off as long as you press it
             SwitchWorldManager.ScheduledTurnOffDarkArea = false;
