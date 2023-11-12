@@ -1,5 +1,7 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
+using DefaultNamespace;
 using UnityEngine;
 
 public class DeathZone : MonoBehaviour
@@ -14,5 +16,11 @@ public class DeathZone : MonoBehaviour
     void Update()
     {
         
+    }
+
+    private void OnCollisionEnter2D(Collision2D other)
+    {
+        var character = LevelStateManager.Instance.character;
+        character.transform.position = LevelStateManager.Instance.respawnPoint.position;
     }
 }

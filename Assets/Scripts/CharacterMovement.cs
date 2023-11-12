@@ -1,25 +1,45 @@
 using System;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody2D))]
 public class CharacterMovement : MonoBehaviour
 {
     public LayerMask groundLayerMask;
-    public float JumpForce = 3;
+    public float jumpForce = 3f;
+    public float speed = 5f;
     
     Rigidbody2D rb;
+    private PlayerInput _playerInput;
     private Vector2 movement;
+    private bool readyToSwitchWorld;
 
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
+        _playerInput = GetComponent<PlayerInput>();
+    }
+
+    private void Start()
+    {
+        
+    }
+
+    private void Update()
+    {
+        if (rb.velocity.y != 0 && readyToSwitchWorld)
+        {
+            readyToSwitchWorld = false;
+            SwitchWorldManager.Instance.SwitchWorld();
+        }
     }
 
     private void FixedUpdate()
     {
-        rb.velocity = new(movement.x, rb.velocity.y);
-
+        if(movement.x != 0)
+            rb.velocity = new(movement.x * speed, rb.velocity.y);
     }
 
     /// <summary>
@@ -47,7 +67,7 @@ public class CharacterMovement : MonoBehaviour
             {
                 if (movement.y > 0)
                 {
-                    rb.AddForce(JumpForce * Vector2.up, ForceMode2D.Impulse);
+                    rb.AddForce(jumpForce * Vector2.up, ForceMode2D.Impulse);
                 }
             }
         }
@@ -63,15 +83,17 @@ public class CharacterMovement : MonoBehaviour
         {
             //anyway we just dont schedule a turn off as long as you press it
             SwitchWorldManager.ScheduledTurnOffDarkArea = false;
-            if (rb.velocity.y != 0 && !SwitchWorldManager.InsideDarkArea)
+            if (!SwitchWorldManager.InsideDarkArea)
             {
-                SwitchWorldManager.Instance.SwitchWorld();
+                //SwitchWorldManager.Instance.SwitchWorld();
+                readyToSwitchWorld = true;
             }
         }
 
-        if (ctx.canceled)
+        if (ctx.performed)
         {
             SwitchWorldManager.ScheduledTurnOffDarkArea = true;
+            readyToSwitchWorld = false;
         }
     }
 }
