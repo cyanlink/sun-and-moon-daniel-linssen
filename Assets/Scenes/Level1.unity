@@ -424,7 +424,7 @@ MonoBehaviour:
   groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
-  jumpForce: 5
+  jumpForce: 10
   speed: 5
 --- !u!50 &541864995
 Rigidbody2D:

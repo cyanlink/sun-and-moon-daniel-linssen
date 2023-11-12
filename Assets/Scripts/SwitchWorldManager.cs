@@ -24,6 +24,11 @@ public class SwitchWorldManager : MonoSingleton<SwitchWorldManager>
         coll = collider;
     }
 
+    public void ToggleDarkArea(bool value)
+    {
+        coll.isTrigger = value;
+    }
+
     public static bool ScheduledTurnOffDarkArea
     {
         get => Instance.scheduleTurnOffDarkArea;

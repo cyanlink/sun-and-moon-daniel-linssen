@@ -1,15 +1,17 @@
 using System;
+using QFramework;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody2D))]
-public class CharacterMovement : MonoBehaviour
+public class CharacterMovement : MonoSingleton<CharacterMovement>
 {
     public LayerMask groundLayerMask;
     public float jumpForce = 3f;
     public float speed = 5f;
+    public DefaultControl DefaultControl { get; private set; }
     
     Rigidbody2D rb;
     private PlayerInput _playerInput;
@@ -20,11 +22,12 @@ public class CharacterMovement : MonoBehaviour
     {
         rb = GetComponent<Rigidbody2D>();
         _playerInput = GetComponent<PlayerInput>();
+        DefaultControl = new DefaultControl();
     }
 
     private void Start()
     {
-        
+        //DefaultControl.Gameplay.SwitchWorld.triggered;
     }
 
     private void Update()
@@ -79,7 +82,7 @@ public class CharacterMovement : MonoBehaviour
     /// <param name="ctx"></param>
     public void OnSwitchWorld(InputAction.CallbackContext ctx)
     {
-        if (ctx.started)
+        if (ctx.performed)
         {
             //anyway we just dont schedule a turn off as long as you press it
             SwitchWorldManager.ScheduledTurnOffDarkArea = false;
@@ -90,9 +93,16 @@ public class CharacterMovement : MonoBehaviour
             }
         }
 
-        if (ctx.performed)
+        if (ctx.canceled)
         {
-            SwitchWorldManager.ScheduledTurnOffDarkArea = true;
+            if (!SwitchWorldManager.InsideDarkArea)
+            {
+                SwitchWorldManager.Instance.ToggleDarkArea(false);
+            }
+            else
+            {
+                SwitchWorldManager.ScheduledTurnOffDarkArea = true;
+            }
             readyToSwitchWorld = false;
         }
     }
