@@ -22,6 +22,7 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
     private float movement;
     private bool readyToSwitchWorld;
 
+    private bool midAirMovementChance = false;
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -48,14 +49,15 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
     private void FixedUpdate()
     {
         //DONE 不应该是velocity跟随输入突变，原作里都是按force来的
-        //FIXME 似乎原作手感逻辑是：跳起后或掉落，在空中允许一次常规加速度横向移动，而后续移动只能以小加速度
-        //FIXME 而落地、进入dark area等操作，均可以重置这个机会
+        //TODO 似乎原作手感逻辑是：跳起后或掉落，在空中允许一次常规加速度横向移动，而后续移动只能以小加速度，而落地、进入dark area等操作，均可以重置这个机会
         if (movement != 0)
         {
-            if (IsTouchingGroundLayer())
+            var groundOrDive = IsTouchingGroundLayer();
+            if (groundOrDive || midAirMovementChance)
             {
                 //rb.velocity = new(movement.x * speed, rb.velocity.y);
                 rb.AddForce(movement * accelerationFactor * Vector2.right, ForceMode2D.Force);
+                midAirMovementChance = groundOrDive;
             }
             else
             {
