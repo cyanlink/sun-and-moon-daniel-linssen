@@ -3,6 +3,7 @@ using QFramework;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.InputSystem.Controls;
 using UnityEngine.Serialization;
 
 [RequireComponent(typeof(Rigidbody2D))]
@@ -11,11 +12,12 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
     public LayerMask groundLayerMask;
     public float jumpForce = 3f;
     public float speed = 5f;
+    public float accelerationFactor = 10;
     public DefaultControl DefaultControl { get; private set; }
     
     Rigidbody2D rb;
     private PlayerInput _playerInput;
-    private Vector2 movement;
+    private float movement;
     private bool readyToSwitchWorld;
 
     private void Awake()
@@ -41,8 +43,19 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
 
     private void FixedUpdate()
     {
-        if(movement.x != 0)
-            rb.velocity = new(movement.x * speed, rb.velocity.y);
+        //FIXME 不应该是velocity跟随输入突变，原作里都是按force来的
+        if (movement != 0)
+        {
+            //rb.velocity = new(movement.x * speed, rb.velocity.y);
+            rb.AddForce(movement * accelerationFactor * Vector2.right, ForceMode2D.Force);
+        }
+        else
+        {
+            rb.velocity = new(0,rb.velocity.y);
+        }
+        var dir = rb.velocity.x.Sign();
+        var capped = Mathf.Clamp(rb.velocity.x.Abs(), 0, speed);
+        rb.velocity = new(dir * capped, rb.velocity.y);
     }
 
     /// <summary>
@@ -51,6 +64,7 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
     /// <returns></returns>
     public bool IsGrounded()
     {
+        //FIXME should change to ray casting or foot detecting
         var isInDark = SwitchWorldManager.InsideDarkArea;
         var grounded = rb.IsTouchingLayers(groundLayerMask);
         return (!isInDark) && grounded;
@@ -60,20 +74,24 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
     public void OnMove(InputAction.CallbackContext ctx)
     {
         //Debug.Log("Moving");
-        movement = ctx.ReadValue<Vector2>();
+        movement = ctx.ReadValue<float>();
+    }
 
+    public void OnJump(InputAction.CallbackContext ctx)
+    {
         if (ctx.performed)
         {
             //Horizontal Movement is always Allowed
             
             if (IsGrounded())
             {
-                if (movement.y > 0)
-                {
-                    Debug.Log($"movement.y:{movement.y}");
-                    rb.AddForce(jumpForce * movement.y * Vector2.up, ForceMode2D.Impulse);
-                }
+                //Debug.Log($"movement.y:{movement.y}");
+                rb.AddForce(jumpForce * Vector2.up, ForceMode2D.Impulse);
             }
+        }else if (ctx.canceled)
+        {
+            //this is kind of correct
+            rb.velocity = new (rb.velocity.x, 0);
         }
     }
 

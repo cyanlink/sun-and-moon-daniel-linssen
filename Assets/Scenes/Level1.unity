@@ -424,8 +424,9 @@ MonoBehaviour:
   groundLayerMask:
     serializedVersion: 2
     m_Bits: 64
-  jumpForce: 6
+  jumpForce: 3
   speed: 5
+  accelerationFactor: 10
 --- !u!50 &541864995
 Rigidbody2D:
   serializedVersion: 4
@@ -438,7 +439,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1
+  m_Mass: 0.5
   m_LinearDrag: 0
   m_AngularDrag: 0
   m_GravityScale: 1
@@ -562,6 +563,22 @@ MonoBehaviour:
         m_CallState: 2
     m_ActionId: e6c2141e-e9c3-45a2-89d0-0be53f8a6733
     m_ActionName: Gameplay/SwitchWorld[/Keyboard/z,/Keyboard/shift]
+  - m_PersistentCalls:
+      m_Calls:
+      - m_Target: {fileID: 541864994}
+        m_TargetAssemblyTypeName: CharacterMovement, Assembly-CSharp
+        m_MethodName: OnJump
+        m_Mode: 0
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+    m_ActionId: 3f1be2bb-87e0-4445-9d6b-368e0b707b79
+    m_ActionName: Gameplay/Jump[/Keyboard/upArrow,/Keyboard/w]
   m_NeverAutoSwitchControlSchemes: 0
   m_DefaultControlScheme: 
   m_DefaultActionMap: Gameplay
@@ -576,7 +593,7 @@ CircleCollider2D:
   m_GameObject: {fileID: 541864992}
   m_Enabled: 1
   m_Density: 1
-  m_Material: {fileID: 6200000, guid: c29f70cf42816499a83e04154f56dd8c, type: 2}
+  m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
     m_Bits: 0
