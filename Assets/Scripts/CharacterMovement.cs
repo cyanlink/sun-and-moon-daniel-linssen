@@ -1,4 +1,5 @@
 using System;
+using System.Collections;
 using QFramework;
 using Unity.VisualScripting;
 using UnityEngine;
@@ -14,6 +15,7 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
     public float speed = 5f;
     public float accelerationFactor = 10;
     public float accelerationFactorInAir = 5;
+    public float fastMoveMidAirDelay = 1f;
     
     public DefaultControl DefaultControl { get; private set; }
     
@@ -22,7 +24,7 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
     private float movement;
     private bool readyToSwitchWorld;
 
-    private bool midAirMovementChance = false;
+    public bool midAirMovementChance = true;
     private void Awake()
     {
         rb = GetComponent<Rigidbody2D>();
@@ -50,14 +52,17 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
     {
         //DONE 不应该是velocity跟随输入突变，原作里都是按force来的
         //TODO 似乎原作手感逻辑是：跳起后或掉落，在空中允许一次常规加速度横向移动，而后续移动只能以小加速度，而落地、进入dark area等操作，均可以重置这个机会
+        var groundOrDive = IsTouchingGroundLayer();
+        midAirMovementChance = groundOrDive || midAirMovementChance;
         if (movement != 0)
         {
-            var groundOrDive = IsTouchingGroundLayer();
             if (groundOrDive || midAirMovementChance)
             {
                 //rb.velocity = new(movement.x * speed, rb.velocity.y);
                 rb.AddForce(movement * accelerationFactor * Vector2.right, ForceMode2D.Force);
-                midAirMovementChance = groundOrDive;
+                
+                //midAirMovementChance = false;
+                StartCoroutine(DisableMidAirFastMove(fastMoveMidAirDelay));
             }
             else
             {
@@ -67,11 +72,18 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
         }
         else
         {
+            //TODO 空中时
             rb.velocity = new(0,rb.velocity.y);
         }
         var dir = rb.velocity.x.Sign();
         var capped = Mathf.Clamp(rb.velocity.x.Abs(), 0, speed);
         rb.velocity = new(dir * capped, rb.velocity.y);
+    }
+
+    private IEnumerator DisableMidAirFastMove(float delay)
+    {
+        yield return new WaitForSeconds(delay);
+        if(!IsTouchingGroundLayer())midAirMovementChance = false;
     }
 
     /// <summary>
@@ -103,7 +115,7 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
         //只有在地面上的时候，跳跃操作才有意义
         if (IsTouchingGroundLayer() && !IsInDarkArea())
         {
-            if (ctx.performed)
+            if (ctx.started)
             {
                 //Horizontal Movement is always Allowed
                 //Debug.Log($"movement.y:{movement.y}");
@@ -123,7 +135,6 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
     /// <param name="ctx"></param>
     public void OnSwitchWorld(InputAction.CallbackContext ctx)
     {
-        //FIXME 现阶段，横向进入dark area有问题
         if (ctx.performed)
         {
             //anyway we just dont schedule a turn off as long as you press it

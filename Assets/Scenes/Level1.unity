@@ -429,6 +429,8 @@ MonoBehaviour:
   speed: 5
   accelerationFactor: 8
   accelerationFactorInAir: 1
+  fastMoveMidAirDelay: 1
+  midAirMovementChance: 1
 --- !u!50 &541864995
 Rigidbody2D:
   serializedVersion: 4
@@ -444,7 +446,7 @@ Rigidbody2D:
   m_Mass: 1
   m_LinearDrag: 0
   m_AngularDrag: 0
-  m_GravityScale: 1.5
+  m_GravityScale: 2
   m_Material: {fileID: 0}
   m_IncludeLayers:
     serializedVersion: 2
@@ -663,7 +665,7 @@ TrailRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
-  m_Time: 5
+  m_Time: 0.5
   m_PreviewTimeScale: 1
   m_Parameters:
     serializedVersion: 3
@@ -681,8 +683,8 @@ TrailRenderer:
         inWeight: 0.33333334
         outWeight: 0.33333334
       - serializedVersion: 3
-        time: 0.16975686
-        value: 0.014084508
+        time: 0.296298
+        value: 0
         inSlope: 0
         outSlope: 0
         tangentMode: 0
