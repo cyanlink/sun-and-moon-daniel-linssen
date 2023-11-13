@@ -426,7 +426,8 @@ MonoBehaviour:
     m_Bits: 64
   jumpForce: 3
   speed: 5
-  accelerationFactor: 10
+  accelerationFactor: 8
+  accelerationFactorInAir: 1
 --- !u!50 &541864995
 Rigidbody2D:
   serializedVersion: 4

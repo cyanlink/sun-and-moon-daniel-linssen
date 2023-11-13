@@ -32,7 +32,8 @@ public class DarkAreaController
 
     private void OnTriggerStay2D(Collider2D other)
     {
-        other.attachedRigidbody.AddForce(-1 * Physics2D.gravity, ForceMode2D.Force);
+        var rb = other.attachedRigidbody;
+        rb.AddForce(-2 * Physics2D.gravity * rb.gravityScale, ForceMode2D.Force);
     }
 
     private void OnTriggerExit2D(Collider2D other)

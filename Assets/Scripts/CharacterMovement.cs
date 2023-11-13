@@ -13,6 +13,8 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
     public float jumpForce = 3f;
     public float speed = 5f;
     public float accelerationFactor = 10;
+    public float accelerationFactorInAir = 5;
+    
     public DefaultControl DefaultControl { get; private set; }
     
     Rigidbody2D rb;
@@ -34,7 +36,9 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
 
     private void Update()
     {
-        if (rb.velocity.y != 0 && readyToSwitchWorld)
+        //横向不能进入的问题是由这里引起的
+        //正确逻辑：只要velocity不是0向量，即可进入dark area
+        if (rb.velocity != Vector2.zero && readyToSwitchWorld)
         {
             readyToSwitchWorld = false;
             SwitchWorldManager.Instance.SwitchWorld();
@@ -43,11 +47,21 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
 
     private void FixedUpdate()
     {
-        //FIXME 不应该是velocity跟随输入突变，原作里都是按force来的
+        //DONE 不应该是velocity跟随输入突变，原作里都是按force来的
+        //FIXME 似乎原作手感逻辑是：跳起后或掉落，在空中允许一次常规加速度横向移动，而后续移动只能以小加速度
+        //FIXME 而落地、进入dark area等操作，均可以重置这个机会
         if (movement != 0)
         {
-            //rb.velocity = new(movement.x * speed, rb.velocity.y);
-            rb.AddForce(movement * accelerationFactor * Vector2.right, ForceMode2D.Force);
+            if (IsTouchingGroundLayer())
+            {
+                //rb.velocity = new(movement.x * speed, rb.velocity.y);
+                rb.AddForce(movement * accelerationFactor * Vector2.right, ForceMode2D.Force);
+            }
+            else
+            {
+                //mid air logic
+                rb.AddForce(movement * accelerationFactorInAir * Vector2.right, ForceMode2D.Force);
+            }
         }
         else
         {
@@ -62,12 +76,17 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
     /// Touching the platform, but not inside of it, only then we allow jumping
     /// </summary>
     /// <returns></returns>
-    public bool IsGrounded()
+    public bool IsTouchingGroundLayer()
     {
         //FIXME should change to ray casting or foot detecting
-        var isInDark = SwitchWorldManager.InsideDarkArea;
         var grounded = rb.IsTouchingLayers(groundLayerMask);
-        return (!isInDark) && grounded;
+        return grounded;
+    }
+
+    public bool IsInDarkArea()
+    {
+        var isInDark = SwitchWorldManager.InsideDarkArea;
+        return isInDark;
     }
     
 
@@ -79,19 +98,20 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
 
     public void OnJump(InputAction.CallbackContext ctx)
     {
-        if (ctx.performed)
+        //只有在地面上的时候，跳跃操作才有意义
+        if (IsTouchingGroundLayer() && !IsInDarkArea())
         {
-            //Horizontal Movement is always Allowed
-            
-            if (IsGrounded())
+            if (ctx.performed)
             {
+                //Horizontal Movement is always Allowed
                 //Debug.Log($"movement.y:{movement.y}");
                 rb.AddForce(jumpForce * Vector2.up, ForceMode2D.Impulse);
             }
-        }else if (ctx.canceled)
-        {
-            //this is kind of correct
-            rb.velocity = new (rb.velocity.x, 0);
+            else if (ctx.canceled)
+            {
+                //this is kind of correct
+                rb.velocity = new(rb.velocity.x, 0);
+            }
         }
     }
 
@@ -101,6 +121,7 @@ public class CharacterMovement : MonoSingleton<CharacterMovement>
     /// <param name="ctx"></param>
     public void OnSwitchWorld(InputAction.CallbackContext ctx)
     {
+        //FIXME 现阶段，横向进入dark area有问题
         if (ctx.performed)
         {
             //anyway we just dont schedule a turn off as long as you press it

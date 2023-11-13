@@ -9,11 +9,9 @@ public class SwitchWorldManager : MonoSingleton<SwitchWorldManager>
     public static bool InsideDarkArea
     {
         get=>Instance.insideDarkArea;
-        set
-        {
-            Debug.Log("Entered Dark Area");
+        set =>
+            //Debug.Log("Entered Dark Area");
             Instance.insideDarkArea = value;
-        }
     }
 
     private bool scheduleTurnOffDarkArea = false;
